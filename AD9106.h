@@ -41,6 +41,13 @@ class AD9106 {
   // Function to stop pattern generation
   void stop_pattern();
 
+  // Function to update pattern with new register values
+  void update_pattern();
+
+  // Function to configure registers to output DDS sourced sinewave on specified
+  // channel
+  int set_sine(int channel, uint16_t gain, uint16_t offset);
+
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
 

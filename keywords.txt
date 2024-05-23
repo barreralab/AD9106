@@ -6,3 +6,4 @@ reg_reset	KEYWORD2
 spi_init	KEYWORD2
 spi_write	KEYWORD2
 spi_read	KEYWORD2
+update_pattern  KEYWORD2

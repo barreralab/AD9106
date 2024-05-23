@@ -49,6 +49,29 @@ void AD9106::stop_pattern() {
   digitalWrite(_trigger, HIGH);
 }
 
+/*
+ * @brief Update runnnig pattern by writing register values in shadow set to
+ * active set
+ * @param none
+ * @return none
+ */
+void AD9106::update_pattern() {
+  spi_write(0x001d, 0x0001);
+  stop_pattern();
+  delay(10);
+  start_pattern();
+}
+
+/*
+ * @brief Configure registers to generate DDS sourced sine wave on output
+ * channel
+ * @param channel - the DAC output to generate waves on
+ * @param gain - digital gain for DAC output
+ * @param offset - digital offset for DAC output
+ * @return 1 for success, 0 for failure
+ */
+int AD9106::set_sine(int channel, uint16_t gain, uint16_t offset) {}
+
 /*********************************************************/
 // SPI FUNCTIONS
 /*********************************************************/
