@@ -57,7 +57,7 @@ void AD9106::stop_pattern() {
  * @param offset - digital offset for DAC output
  * @return 1 for success, 0 for failure
  */
-int AD9106::set_sine(int channel, uint16_t gain, uint16_t, offset) {}
+int AD9106::set_sine(int channel, uint16_t gain, uint16_t offset) {}
 
 /*********************************************************/
 // SPI FUNCTIONS
