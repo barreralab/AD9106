@@ -5,8 +5,8 @@
             to work as header for Arduino UNO R3
 ******************************************************************************/
 
-#ifndef __ad910x_h__
-#define __ad910x_h__
+#ifndef __ad9106_h__
+#define __ad9106_h__
 
 #include "Arduino.h"
 
