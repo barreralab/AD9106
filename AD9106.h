@@ -10,6 +10,11 @@
 
 #include "Arduino.h"
 
+#define RAMUPDATE 0x001d
+#define PAT_STATUS 0x001e
+
+enum DAC_CHNL { DAC_1 = 1, DAC_2, DAC_3, DAC_4 };
+
 class AD9106 {
  public:
   int cs;
@@ -73,6 +78,15 @@ class AD9106 {
  private:
   int _en_cvddx;
   int _trigger;
+
+  // Base addresses for DAC specific registers
+  const uint16_t DAC_DOF_BASE = 0x0025;
+  const uint16_t DAC_DGAIN_BASE = 0x0035;
+  const uint16_t DDS_PW_BASE = 0x0043;
+  const uint16_t START_DLY_BASE = 0x005c;
+
+  // Look-up function for DAC specific registers given base
+  uint16_t lookup_DAC(uint16_t base_addr, DAC_CHNL dac);
 };
 
 #endif

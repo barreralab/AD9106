@@ -127,3 +127,11 @@ int16_t AD9106::spi_read(uint16_t addr) {
 
   return out;
 }
+
+uint16_t AD9106::lookup_DAC(uint16_t base_addr, DAC_CHNL dac) {
+  // DAC specific registers after 0x0050 are grouped in 4s
+  if (base_addr < 0x0050) {
+    return base_addr - (dac - 1);
+  }
+  return base_addr - 4 * (dac - 1);
+}
