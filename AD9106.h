@@ -10,10 +10,6 @@
 
 #include "Arduino.h"
 
-// Global Register Values
-#define RAMUPDATE 0x001d
-#define PAT_STATUS 0x001e
-
 // enum to constrain function parameters
 enum DAC_CHNL { DAC_1 = 1, DAC_2, DAC_3, DAC_4 };
 
@@ -77,6 +73,12 @@ class AD9106 {
   // // values
   // void AD910x_update_regs(uint16_t data[]);
 
+  // Publicly accessible register addresses for common operations
+  static const uint16_t RAMUPDATE;
+  static const uint16_t PAT_STATUS;
+  static const uint16_t WAV4_3CONFIG;
+  static const uint16_t WAV2_1CONFIG;
+
  private:
   int _en_cvddx;
   int _trigger;
@@ -87,8 +89,19 @@ class AD9106 {
   static const uint16_t DDS_PW_BASE;
   static const uint16_t START_DLY_BASE;
 
-  // Look-up function for DAC specific registers given base
-  uint16_t get_dac_addr(uint16_t base_addr, DAC_CHNL dac);
+  /*
+   * @brief Get address for specific DAC based on given base address
+   * @param base_addr - constant base address
+   * @param dac - the specific dac channel
+   * @return dac_addr - the address for dac relative to base
+   */
+  uint16_t get_dac_addr(uint16_t base_addr, DAC_CHNL dac) {
+    // DAC specific registers after 0x0050 are grouped in 4s
+    if (base_addr < 0x0050) {
+      return base_addr - (dac - 1);
+    }
+    return base_addr - 4 * (dac - 1);
+  }
 };
 
 #endif

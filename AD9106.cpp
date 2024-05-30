@@ -3,7 +3,12 @@
 #include <SPI.h>
 #include "AD9106.h"
 
-// Static variable initializations
+// Definitions of static const uint16_t members
+const uint16_t AD9106::RAMUPDATE = 0x001d;
+const uint16_t AD9106::PAT_STATUS = 0x001e;
+const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
+const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
+
 const uint16_t AD9106::DAC_DOF_BASE = 0x0025;
 const uint16_t AD9106::DAC_DGAIN_BASE = 0x0035;
 const uint16_t AD9106::DDS_PW_BASE = 0x0043;
@@ -132,22 +137,4 @@ int16_t AD9106::spi_read(uint16_t addr) {
   delay(1);
 
   return out;
-}
-
-/*********************************************************/
-// PRIVATE FUNCTIONS
-/*********************************************************/
-
-/*
- * @brief Get address for specific DAC based on given base address
- * @param base_addr - constant base address
- * @param dac - the specific dac channel
- * @return dac_addr - the address for dac relative to base
- */
-uint16_t AD9106::get_dac_addr(uint16_t base_addr, DAC_CHNL dac) {
-  // DAC specific registers after 0x0050 are grouped in 4s
-  if (base_addr < 0x0050) {
-    return base_addr - (dac - 1);
-  }
-  return base_addr - 4 * (dac - 1);
 }
