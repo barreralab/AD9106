@@ -51,6 +51,8 @@ class AD9106 {
   // channel
   int set_sine(int channel, uint16_t gain, uint16_t offset);
 
+  int set_dgain(DAC_CHNL dac, int16_t value);
+
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
 

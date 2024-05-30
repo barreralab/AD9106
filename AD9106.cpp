@@ -84,6 +84,11 @@ void AD9106::update_pattern() {
  */
 int AD9106::set_sine(int channel, uint16_t gain, uint16_t offset) {}
 
+int AD9106::set_dgain(DAC_CHNL dac, int16_t gain) {
+  uint16_t dac_addr = get_dac_addr(DAC_DGAIN_BASE, dac);
+  spi_write(dac_addr, gain);
+}
+
 /*********************************************************/
 // SPI FUNCTIONS
 /*********************************************************/
