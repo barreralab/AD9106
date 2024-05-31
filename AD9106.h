@@ -73,6 +73,8 @@ class AD9106 {
  private:
   int _en_cvddx;
   int _trigger;
+
+  static const uint16_t CFG_ERROR;
 };
 
 #endif
