@@ -70,11 +70,39 @@ class AD9106 {
   // // values
   // void AD910x_update_regs(uint16_t data[]);
 
+  //   Error Codes
+  enum ErrorCode {
+    SUCCESS,
+    MEM_READ_ERR,
+    ODD_ADDR_ERR,
+    PERIOD_SHORT_ERR,
+    DOUT_START_SHORT_ERR,
+    PAT_DLY_SHORT_ERR,
+    DOUT_START_LG_ERR
+  };
+
  private:
   int _en_cvddx;
   int _trigger;
 
-  static const uint16_t CFG_ERROR;
+  static const uint16_t CFG_ERROR = 0x0060;
+
+  AD9106::ErrorCode check_error() {
+    int16_t code = spi_read(CFG_ERROR) & 0x003F;  // Mask for last 6 bits
+    if (code & 0x0001)
+      return AD9106::MEM_READ_ERR;
+    if (code & 0x0002)
+      return AD9106::ODD_ADDR_ERR;
+    if (code & 0x0004)
+      return AD9106::PERIOD_SHORT_ERR;
+    if (code & 0x0008)
+      return AD9106::DOUT_START_SHORT_ERR;
+    if (code & 0x0010)
+      return AD9106::PAT_DLY_SHORT_ERR;
+    if (code & 0x0020)
+      return AD9106::DOUT_START_LG_ERR;
+    return AD9106::SUCCESS;
+  }
 };
 
 #endif

@@ -3,8 +3,6 @@
 #include <SPI.h>
 #include "AD9106.h"
 
-const uint16_t CFG_ERROR = 0x0060;
-
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX)
     : cs(CS), reset(RESET), _trigger(TRIGGER), _en_cvddx(EN_CVDDX) {}
 
