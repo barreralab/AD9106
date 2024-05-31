@@ -10,8 +10,16 @@
 
 #include "Arduino.h"
 
-// enum to constrain function parameters
+// enum for DAC Channels to constrain function parameters
 enum DAC_CHNL { DAC_1 = 1, DAC_2, DAC_3, DAC_4 };
+
+// enum for DAC Properties to constrain function parameters
+enum DAC_PROP {
+  DOFFSET = 0x0025,
+  DGAIN = 0x0035,
+  PHASE = 0x0043,
+  START_DELAY = 0x005c
+};
 
 class AD9106 {
  public:
@@ -47,11 +55,14 @@ class AD9106 {
   // Function to update pattern with new register values
   void update_pattern();
 
-  // Function to configure registers to output DDS sourced sinewave on specified
-  // channel
-  int set_sine(int channel, uint16_t gain, uint16_t offset);
+  // Function to set register properties
+  int set_DAC_prop(DAC_PROP property, DAC_CHNL dac, int16_t value);
 
-  int set_dgain(DAC_CHNL dac, int16_t value);
+  // Wrapper Functions for set_DAC_prop
+  int set_DAC_DOFFSET(DAC_CHNL dac, int16_t offset);
+  int set_DAC_DGAIN(DAC_CHNL dac, int16_t gain);
+  int set_DAC_PHASE(DAC_CHNL dac, int16_t phase);
+  int set_DAC_START_DELAY(DAC_CHNL dac, int16_t start_delay);
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
@@ -62,19 +73,6 @@ class AD9106 {
   // SPI read function
   int16_t spi_read(uint16_t addr);
 
-  // // Function to display register data
-  // void print_data(uint16_t addr, uint16_t data);
-
-  // // Function to write to SRAM
-  // void AD910x_update_sram(int16_t data[]);
-
-  // // Function to display n SRAM data
-  // void AD910x_print_sram(uint16_t n);
-
-  // // Function to write to device SPI registers and display updated register
-  // // values
-  // void AD910x_update_regs(uint16_t data[]);
-
   // Publicly accessible register addresses for common operations
   static const uint16_t RAMUPDATE;
   static const uint16_t PAT_STATUS;
@@ -84,12 +82,6 @@ class AD9106 {
  private:
   int _en_cvddx;
   int _trigger;
-
-  // Base addresses for DAC specific registers
-  static const uint16_t DAC_DOF_BASE;
-  static const uint16_t DAC_DGAIN_BASE;
-  static const uint16_t DDS_PW_BASE;
-  static const uint16_t START_DLY_BASE;
 
   /*
    * @brief Get address for specific DAC based on given base address
