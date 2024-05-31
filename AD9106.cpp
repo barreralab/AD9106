@@ -8,6 +8,8 @@ const uint16_t AD9106::RAMUPDATE = 0x001d;
 const uint16_t AD9106::PAT_STATUS = 0x001e;
 const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
 const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
+const uint16_t AD9106::DDSTW_MSB = 0x003E;
+const uint16_t AD9106::DDSTW_LSB = 0x003F;
 
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX)
     : cs(CS), reset(RESET), _trigger(TRIGGER), _en_cvddx(EN_CVDDX) {}
@@ -79,27 +81,27 @@ void AD9106::update_pattern() {
  * @return 0 if the property was set successfully, or an error code if an error
  * occurred.
  */
-int AD9106::set_DAC_prop(DAC_PROP property, DAC_CHNL dac, int16_t value) {
+int AD9106::set_CHNL_prop(CHNL_PROP property, CHNL dac, int16_t value) {
   uint16_t dac_addr = get_dac_addr(property, dac);
   spi_write(dac_addr, value);
   return 0;
 }
 
 // Wrapper Functions for set_DAC_prop
-int AD9106::set_DAC_DOFFSET(DAC_CHNL dac, int16_t offset) {
-  return set_DAC_prop(DOFFSET, dac, offset);
+int AD9106::set_CHNL_DOFFSET(CHNL chnl, int16_t offset) {
+  return set_CHNL_prop(DOFFSET, chnl, offset);
 }
 
-int AD9106::set_DAC_DGAIN(DAC_CHNL dac, int16_t gain) {
-  return set_DAC_prop(DGAIN, dac, gain);
+int AD9106::set_CHNL_DGAIN(CHNL chnl, int16_t gain) {
+  return set_CHNL_prop(DGAIN, chnl, gain);
 }
 
-int AD9106::set_DAC_PHASE(DAC_CHNL dac, int16_t phase) {
-  return set_DAC_prop(PHASE, dac, phase);
+int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
+  return set_CHNL_prop(DDS_PHASE, chnl, phase);
 }
 
-int AD9106::set_DAC_START_DELAY(DAC_CHNL dac, int16_t delay) {
-  return set_DAC_prop(START_DELAY, dac, delay);
+int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
+  return set_CHNL_prop(START_DELAY, chnl, delay);
 }
 
 /*********************************************************/
