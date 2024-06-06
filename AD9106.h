@@ -10,6 +10,17 @@
 
 #include "Arduino.h"
 
+// enum for DAC Channels to constrain function parameters
+enum CHNL { CHNL_1 = 1, CHNL_2, CHNL_3, CHNL_4 };
+
+// enum for channel properties to constrain function parameters
+enum CHNL_PROP {
+  DOFFSET = 0x0025,
+  DGAIN = 0x0035,
+  DDS_PHASE = 0x0043,
+  START_DELAY = 0x005c
+};
+
 class AD9106 {
  public:
   int cs;
@@ -44,9 +55,14 @@ class AD9106 {
   // Function to update pattern with new register values
   void update_pattern();
 
-  // Function to configure registers to output DDS sourced sinewave on specified
-  // channel
-  int set_sine(int channel, uint16_t gain, uint16_t offset);
+  // Function to set register properties
+  int set_CHNL_prop(CHNL_PROP property, CHNL chnl, int16_t value);
+
+  // Wrapper Functions for set_CHNL_prop
+  int set_CHNL_DOFFSET(CHNL chnl, int16_t offset);
+  int set_CHNL_DGAIN(CHNL chnl, int16_t gain);
+  int set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase);
+  int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
@@ -57,22 +73,31 @@ class AD9106 {
   // SPI read function
   int16_t spi_read(uint16_t addr);
 
-  // // Function to display register data
-  // void print_data(uint16_t addr, uint16_t data);
-
-  // // Function to write to SRAM
-  // void AD910x_update_sram(int16_t data[]);
-
-  // // Function to display n SRAM data
-  // void AD910x_print_sram(uint16_t n);
-
-  // // Function to write to device SPI registers and display updated register
-  // // values
-  // void AD910x_update_regs(uint16_t data[]);
+  // Publicly accessible register addresses for common operations
+  static const uint16_t RAMUPDATE;
+  static const uint16_t PAT_STATUS;
+  static const uint16_t WAV4_3CONFIG;
+  static const uint16_t WAV2_1CONFIG;
+  static const uint16_t DDSTW_MSB;
+  static const uint16_t DDSTW_LSB;
 
  private:
   int _en_cvddx;
   int _trigger;
+
+  /*
+   * @brief Get address for specific DAC based on given base address
+   * @param base_addr - constant base address
+   * @param dac - the specific dac channel
+   * @return dac_addr - the address for dac relative to base
+   */
+  uint16_t get_dac_addr(uint16_t base_addr, CHNL dac) {
+    // DAC specific registers after 0x0050 are grouped in 4s
+    if (base_addr < 0x0050) {
+      return base_addr - (dac - 1);
+    }
+    return base_addr - 4 * (dac - 1);
+  }
 };
 
 #endif
