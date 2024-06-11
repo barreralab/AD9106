@@ -38,10 +38,14 @@ class AD9106 {
       0x005f, 0x001e, 0x001d};
 
   /*** 4-Wire SPI, Reset, and Trigger configuration & constructor ***/
-  AD9106(int CS = 10, int RESET = 8, int TRIGGER = 7, int EN_CVDDX = 2);
+  AD9106(int CS = 10,
+         int RESET = 8,
+         int TRIGGER = 7,
+         int EN_CVDDX = 2,
+         int SHDN = 4);
 
   // Function to initialize GPIO pins on Arduino
-  void begin();
+  void begin(int amp = 0);
 
   // Function to reset register values
   void reg_reset();
@@ -54,6 +58,9 @@ class AD9106 {
 
   // Function to update pattern with new register values
   void update_pattern();
+
+  // Function to end AD9106 operation
+  void end();
 
   // Function to set register properties
   int set_CHNL_prop(CHNL_PROP property, CHNL chnl, int16_t value);
@@ -84,6 +91,7 @@ class AD9106 {
  private:
   int _en_cvddx;
   int _trigger;
+  int _shdn;
 
   /*
    * @brief Get address for specific DAC based on given base address

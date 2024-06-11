@@ -11,15 +11,19 @@ const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
 const uint16_t AD9106::DDSTW_MSB = 0x003E;
 const uint16_t AD9106::DDSTW_LSB = 0x003F;
 
-AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX)
-    : cs(CS), reset(RESET), _trigger(TRIGGER), _en_cvddx(EN_CVDDX) {}
+AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
+    : cs(CS),
+      reset(RESET),
+      _trigger(TRIGGER),
+      _en_cvddx(EN_CVDDX),
+      _shdn(SHDN) {}
 
 /*
  * @brief Initialize GPIO and SPI pins on Arduino
  * @param none
  * @return none
  */
-void AD9106::begin() {
+void AD9106::begin(int amp) {
   pinMode(cs, OUTPUT);
   pinMode(reset, OUTPUT);
   pinMode(_trigger, OUTPUT);
@@ -31,6 +35,12 @@ void AD9106::begin() {
 
   // Enable on-board oscillators
   digitalWrite(_en_cvddx, HIGH);
+
+  // Set power to op amps if enabled
+  if (amp == 1) {
+    pinMode(_shdn, OUTPUT);
+    digitalWrite(_shdn, HIGH);
+  }
 }
 
 void AD9106::reg_reset() {
@@ -69,6 +79,12 @@ void AD9106::update_pattern() {
   spi_write(0x001d, 0x0001);
   delay(10);
   start_pattern();
+}
+
+void AD9106::end() {
+  stop_pattern();
+  digitalWrite(_en_cvddx, LOW);
+  digitalWrite(_shdn, LOW);
 }
 
 /**
