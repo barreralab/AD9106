@@ -8,6 +8,8 @@
 #ifndef __ad9106_h__
 #define __ad9106_h__
 
+// specify if on-board op-amps are used
+
 #include "Arduino.h"
 
 // enum for DAC Channels to constrain function parameters
@@ -45,7 +47,7 @@ class AD9106 {
          int SHDN = 4);
 
   // Function to initialize GPIO pins on Arduino
-  void begin(int amp = 0);
+  void begin(bool OP_AMPS = false);
 
   // Function to reset register values
   void reg_reset();
