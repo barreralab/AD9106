@@ -23,7 +23,7 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
  * @param none
  * @return none
  */
-void AD9106::begin(int amp) {
+void AD9106::begin(bool OP_AMPS) {
   pinMode(cs, OUTPUT);
   pinMode(reset, OUTPUT);
   pinMode(_trigger, OUTPUT);
@@ -37,7 +37,7 @@ void AD9106::begin(int amp) {
   digitalWrite(_en_cvddx, HIGH);
 
   // Set power to op amps if enabled
-  if (amp == 1) {
+  if (OP_AMPS) {
     pinMode(_shdn, OUTPUT);
     digitalWrite(_shdn, HIGH);
   }
