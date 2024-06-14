@@ -73,6 +73,9 @@ class AD9106 {
   int set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase);
   int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
 
+  // Function to set DDS Tuning Words
+  int set_DDSTWs(uint32_t value);
+
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
 

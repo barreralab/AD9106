@@ -76,7 +76,7 @@ void AD9106::stop_pattern() {
 void AD9106::update_pattern() {
   stop_pattern();
   delay(10);
-  spi_write(0x001d, 0x0001);
+  spi_write(RAMUPDATE, 0x0001);
   delay(10);
   start_pattern();
 }
@@ -118,6 +118,23 @@ int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
 
 int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
   return set_CHNL_prop(START_DELAY, chnl, delay);
+}
+
+/**
+ * Sets the DDS tuning words based on 24 bit value
+ *
+ * @param value The value to encode in the tuning words
+ *
+ * @return 0 if the property was set successfully, or an error code if an error
+ * occurred.
+ */
+
+int AD9106::set_DDSTWs(uint32_t value) {
+  // Only 6 bytes of data are used
+  int16_t msb = value >> 8;
+  int16_t lsb = (value & 0xff) << 8;
+  spi_write(DDSTW_MSB, msb);
+  spi_write(DDSTW_LSB, lsb);
 }
 
 /*********************************************************/
