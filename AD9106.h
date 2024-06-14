@@ -23,6 +23,16 @@ enum CHNL_PROP {
   START_DELAY = 0x005c
 };
 
+enum ErrorCode {
+  SUCCESS = 0,
+  MEM_READ_ERR = 2,
+  ODD_ADDR_ERR = 3,
+  PERIOD_SHORT_ERR = 5,
+  DOUT_START_SHORT_ERR = 7,
+  PAT_DLY_SHORT_ERR = 11,
+  DOUT_START_LG_ERR = 13
+};
+
 class AD9106 {
  public:
   int cs;
@@ -89,6 +99,7 @@ class AD9106 {
   static const uint16_t WAV2_1CONFIG;
   static const uint16_t DDSTW_MSB;
   static const uint16_t DDSTW_LSB;
+  static const uint16_t CFG_ERROR;
 
  private:
   int _en_cvddx;
@@ -108,6 +119,9 @@ class AD9106 {
     }
     return base_addr - 4 * (dac - 1);
   }
+
+  // Error Handling Function
+  ErrorCode get_error();
 };
 
 #endif

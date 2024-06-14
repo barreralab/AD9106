@@ -10,6 +10,7 @@ const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
 const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
 const uint16_t AD9106::DDSTW_MSB = 0x003E;
 const uint16_t AD9106::DDSTW_LSB = 0x003F;
+const uint16_t AD9106::CFG_ERROR = 0x0060;
 
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
     : cs(CS),
@@ -173,4 +174,23 @@ int16_t AD9106::spi_read(uint16_t addr) {
   delay(1);
 
   return out;
+}
+
+/*********************************************************/
+// ERROR HANDLING
+/*********************************************************/
+
+int AD9106::get_error() {
+  // Error flags in least significant 6 bits
+  int16_t err_val = spi_read(CFG_ERROR) & 0x3f;
+  if (err_val == 0) {
+    return SUCCESS;
+  } else {
+    int errors = 1;
+    for (int i = 0; i < 6; i++) {
+      if (err_val & (1 << i)) {
+        errors *= pow(2, i);
+      }
+    }
+  }
 }
