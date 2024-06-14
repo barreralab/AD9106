@@ -121,7 +121,7 @@ class AD9106 {
   }
 
   // Error Handling Function
-  ErrorCode get_error();
+  int get_error();
 };
 
 #endif
