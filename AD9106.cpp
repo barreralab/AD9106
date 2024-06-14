@@ -3,15 +3,27 @@
 #include <SPI.h>
 #include "AD9106.h"
 
-AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX)
-    : cs(CS), reset(RESET), _trigger(TRIGGER), _en_cvddx(EN_CVDDX) {}
+// Definitions of static const uint16_t members
+const uint16_t AD9106::RAMUPDATE = 0x001d;
+const uint16_t AD9106::PAT_STATUS = 0x001e;
+const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
+const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
+const uint16_t AD9106::DDSTW_MSB = 0x003E;
+const uint16_t AD9106::DDSTW_LSB = 0x003F;
+
+AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
+    : cs(CS),
+      reset(RESET),
+      _trigger(TRIGGER),
+      _en_cvddx(EN_CVDDX),
+      _shdn(SHDN) {}
 
 /*
  * @brief Initialize GPIO and SPI pins on Arduino
  * @param none
  * @return none
  */
-void AD9106::begin() {
+void AD9106::begin(bool OP_AMPS) {
   pinMode(cs, OUTPUT);
   pinMode(reset, OUTPUT);
   pinMode(_trigger, OUTPUT);
@@ -23,6 +35,12 @@ void AD9106::begin() {
 
   // Enable on-board oscillators
   digitalWrite(_en_cvddx, HIGH);
+
+  // Set power to op amps if enabled
+  if (OP_AMPS) {
+    pinMode(_shdn, OUTPUT);
+    digitalWrite(_shdn, HIGH);
+  }
 }
 
 void AD9106::reg_reset() {
@@ -50,8 +68,8 @@ void AD9106::stop_pattern() {
 }
 
 /*
- * @brief Update runnnig pattern by writing register values in shadow set to
- * active set
+ * @brief Update running pattern by writing register values in shadow set
+ * to active set
  * @param none
  * @return none
  */
@@ -63,15 +81,44 @@ void AD9106::update_pattern() {
   start_pattern();
 }
 
-/*
- * @brief Configure registers to generate DDS sourced sine wave on output
- * channel
- * @param channel - the DAC output to generate waves on
- * @param gain - digital gain for DAC output
- * @param offset - digital offset for DAC output
- * @return 1 for success, 0 for failure
+void AD9106::end() {
+  stop_pattern();
+  digitalWrite(_en_cvddx, LOW);
+  digitalWrite(_shdn, LOW);
+}
+
+/**
+ * Sets the property of a DAC channel to a specified value.
+ *
+ * @param property The property of the DAC channel to set.
+ * @param dac The DAC channel to set the property for.
+ * @param value The value to set the property to.
+ *
+ * @return 0 if the property was set successfully, or an error code if an error
+ * occurred.
  */
-int AD9106::set_sine(int channel, uint16_t gain, uint16_t offset) {}
+int AD9106::set_CHNL_prop(CHNL_PROP property, CHNL dac, int16_t value) {
+  uint16_t dac_addr = get_dac_addr(property, dac);
+  spi_write(dac_addr, value);
+  return 0;
+}
+
+// Wrapper Functions for set_DAC_prop
+int AD9106::set_CHNL_DOFFSET(CHNL chnl, int16_t offset) {
+  return set_CHNL_prop(DOFFSET, chnl, offset);
+}
+
+int AD9106::set_CHNL_DGAIN(CHNL chnl, int16_t gain) {
+  return set_CHNL_prop(DGAIN, chnl, gain);
+}
+
+int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
+  return set_CHNL_prop(DDS_PHASE, chnl, phase);
+}
+
+int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
+  return set_CHNL_prop(START_DELAY, chnl, delay);
+}
 
 /*********************************************************/
 // SPI FUNCTIONS

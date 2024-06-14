@@ -20,8 +20,18 @@ spi_init	KEYWORD2
 spi_write	KEYWORD2
 spi_read	KEYWORD2
 update_pattern	KEYWORD2
+set_CHNL_prop	KEYWORD2
+set_CHNL_DGAIN	KEYWORD2
+set_CHNL_DDS_PHASE	KEYWORD2
+set_CHNL_START_DELAY	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+RAMUPDATE	LITERAL1
+PAT_STATUS	LITERAL1
+WAV4_3CONFIG	LITERAL1
+WAV2_1CONFIG	LITERAL1
+DDSTW_MSB	LITERAL1
+DDSTW_LSB	LITERAL1
