@@ -18,9 +18,12 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
       _en_cvddx(EN_CVDDX),
       _shdn(SHDN) {}
 
-/*
+/**
  * @brief Initialize GPIO and SPI pins on Arduino
- * @param none
+ *
+ * @param OP_AMPS true iff board configured for on board op amps
+ * @param FCLK NULL if default clock used, frequency of external clock if not
+ *
  * @return none
  */
 void AD9106::begin(bool OP_AMPS, float FCLK) {
@@ -55,7 +58,7 @@ void AD9106::reg_reset() {
   digitalWrite(reset, HIGH);
 }
 
-/*
+/**
  * @brief Start pattern generation by setting AD9106 trigger pin to 0
  * @param none
  * @return none
@@ -64,7 +67,7 @@ void AD9106::start_pattern() {
   digitalWrite(_trigger, LOW);
 }
 
-/*
+/**
  * @brief Stop pattern generation by setting AD9106 trigger pin to 1
  * @param none
  * @return none
@@ -73,7 +76,7 @@ void AD9106::stop_pattern() {
   digitalWrite(_trigger, HIGH);
 }
 
-/*
+/**
  * @brief Update running pattern by writing register values in shadow set
  * to active set
  * @param none
@@ -126,13 +129,55 @@ int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
   return set_CHNL_prop(START_DELAY, chnl, delay);
 }
 
-int AD9106::setDDSfreq(float freq) {}
+/**
+ * Sets the DDS frequency to specified value
+ *
+ * @param freq the desired DDS frequency
+ *
+ * @return 0 if the property was set successfully, or an error code if an error
+ * occurred.
+ */
+
+int AD9106::setDDSfreq(float freq) {
+  if (freq > fclk) {
+    return 1;
+  }
+
+  // calculate required DDSTW
+  const float factor = pow(2, 24) / fclk;
+  uint32_t DDSTW = ((uint32_t)round(factor * freq));
+
+  // partition 6 significant bytes of DDSTW for TW MSB/LSB regs
+  int16_t msb = DDSTW >> 8;
+  int16_t lsb = (DDSTW & 0xff) << 8;
+  spi_write(DDSTW_MSB, msb);
+  spi_write(DDSTW_LSB, lsb);
+
+  return 0;
+}
+
+/**
+ * Get the current DDS frequency
+ *
+ * @return DDS frequency
+ */
+
+float AD9106::getDDSfreq() {
+  // get DDSTW from TW registers
+  uint16_t msb = spi_read(DDSTW_MSB);
+  uint16_t lsb = spi_read(DDSTW_LSB);
+  uint32_t DDSTW = (msb << 8) | (lsb >> 8);
+
+  // calculate frequency
+  float freq = DDSTW * fclk / pow(2, 24);
+  return freq;
+}
 
 /*********************************************************/
 // SPI FUNCTIONS
 /*********************************************************/
 
-/*
+/**
  * @brief Initialize AD9106 SPI communication at [hz] speed
  * @param hz - SPI bus frequency in hz
  * @return none
@@ -142,7 +187,7 @@ void AD9106::spi_init(uint32_t hz) {
   SPI.beginTransaction(SPISettings(hz, MSBFIRST, SPI_MODE0));
 }
 
-/*
+/**
  * @brief Write 16-bit data to AD9106 SPI/SRAM register
  * @param addr - SPI/SRAM address
  * @param data - data to be written to register address
@@ -162,7 +207,7 @@ int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
   return out;
 };
 
-/*
+/**
  * @brief Read 16-bit data from AD9106 SPI/SRAM register
  * @param addr - SPI/SRAM address
  * @return reg_data - data returned by AD9106

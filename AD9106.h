@@ -76,7 +76,7 @@ class AD9106 {
 
   // Functions to set/get DDS frequency
   int setDDSfreq(float freq);
-  int getDDSfreq(float freq);
+  float getDDSfreq();
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
