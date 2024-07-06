@@ -23,7 +23,7 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
  * @param none
  * @return none
  */
-void AD9106::begin(bool OP_AMPS) {
+void AD9106::begin(bool OP_AMPS, float FCLK) {
   pinMode(cs, OUTPUT);
   pinMode(reset, OUTPUT);
   pinMode(_trigger, OUTPUT);
@@ -33,8 +33,14 @@ void AD9106::begin(bool OP_AMPS) {
   digitalWrite(_trigger, HIGH);
   digitalWrite(reset, HIGH);
 
-  // Enable on-board oscillators
-  digitalWrite(_en_cvddx, HIGH);
+  if (FCLK == NULL) {
+    // Enable on-board oscillators and set fclk to default
+    digitalWrite(_en_cvddx, HIGH);
+    fclk = 156250000;
+  } else {
+    digitalWrite(_en_cvddx, LOW);
+    fclk = FCLK;
+  }
 
   // Set power to op amps if enabled
   if (OP_AMPS) {
@@ -119,6 +125,8 @@ int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
 int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
   return set_CHNL_prop(START_DELAY, chnl, delay);
 }
+
+int AD9106::setDDSfreq(float freq) {}
 
 /*********************************************************/
 // SPI FUNCTIONS
