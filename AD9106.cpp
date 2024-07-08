@@ -85,7 +85,7 @@ void AD9106::stop_pattern() {
 void AD9106::update_pattern() {
   stop_pattern();
   delay(10);
-  spi_write(0x001d, 0x0001);
+  spi_write(RAMUPDATE, 0x0001);
   delay(10);
   start_pattern();
 }
