@@ -83,15 +83,15 @@ void AD9106::stop_pattern() {
  * @return none
  */
 void AD9106::update_pattern() {
-  stop_pattern();
+  this->stop_pattern();
   delay(10);
-  spi_write(RAMUPDATE, 0x0001);
+  this->spi_write(RAMUPDATE, 0x0001);
   delay(10);
-  start_pattern();
+  this->start_pattern();
 }
 
 void AD9106::end() {
-  stop_pattern();
+  this->stop_pattern();
   digitalWrite(_en_cvddx, LOW);
   digitalWrite(_shdn, LOW);
 }
@@ -107,26 +107,26 @@ void AD9106::end() {
  * occurred.
  */
 int AD9106::set_CHNL_prop(CHNL_PROP property, CHNL dac, int16_t value) {
-  uint16_t dac_addr = get_dac_addr(property, dac);
-  spi_write(dac_addr, value);
+  uint16_t dac_addr = this->get_dac_addr(property, dac);
+  this->spi_write(dac_addr, value);
   return 0;
 }
 
 // Wrapper Functions for set_DAC_prop
 int AD9106::set_CHNL_DOFFSET(CHNL chnl, int16_t offset) {
-  return set_CHNL_prop(DOFFSET, chnl, offset);
+  return this->set_CHNL_prop(DOFFSET, chnl, offset);
 }
 
 int AD9106::set_CHNL_DGAIN(CHNL chnl, int16_t gain) {
-  return set_CHNL_prop(DGAIN, chnl, gain);
+  return this->set_CHNL_prop(DGAIN, chnl, gain);
 }
 
 int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
-  return set_CHNL_prop(DDS_PHASE, chnl, phase);
+  return this->set_CHNL_prop(DDS_PHASE, chnl, phase);
 }
 
 int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
-  return set_CHNL_prop(START_DELAY, chnl, delay);
+  return this->set_CHNL_prop(START_DELAY, chnl, delay);
 }
 
 /**
@@ -150,9 +150,8 @@ int AD9106::setDDSfreq(float freq) {
   // partition 6 significant bytes of DDSTW for TW MSB/LSB regs
   int16_t msb = DDSTW >> 8;
   int16_t lsb = (DDSTW & 0xff) << 8;
-  spi_write(DDSTW_MSB, msb);
-  spi_write(DDSTW_LSB, lsb);
-
+  this->spi_write(DDSTW_MSB, msb);
+  this->spi_write(DDSTW_LSB, lsb);
   return 0;
 }
 
@@ -164,8 +163,8 @@ int AD9106::setDDSfreq(float freq) {
 
 float AD9106::getDDSfreq() {
   // get DDSTW from TW registers
-  uint16_t msb = spi_read(DDSTW_MSB);
-  uint16_t lsb = spi_read(DDSTW_LSB);
+  uint16_t msb = this->spi_read(DDSTW_MSB);
+  uint16_t lsb = this->spi_read(DDSTW_LSB);
   uint32_t DDSTW = (msb << 8) | (lsb >> 8);
 
   // calculate frequency
