@@ -52,9 +52,6 @@ class AD9106 {
     INVALID_PARAM = 7
   };
 
-  // Function to read and update error field
-  ErrorCode get_last_error();
-
   /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
    * and op-amp configuration & constructor ***/
   AD9106(int CS = 10,
@@ -93,6 +90,9 @@ class AD9106 {
   // Functions to set/get DDS frequency
   void setDDSfreq(float freq);
   float getDDSfreq();
+
+  // Function to read and update error field
+  ErrorCode get_last_error();
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
