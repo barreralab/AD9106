@@ -17,7 +17,9 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
       reset(RESET),
       _trigger(TRIGGER),
       _en_cvddx(EN_CVDDX),
-      _shdn(SHDN) {}
+      _shdn(SHDN) {
+  _last_error = NO_ERROR;
+}
 
 /**
  * @brief Initialize GPIO and SPI pins on Arduino
