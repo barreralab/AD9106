@@ -23,16 +23,6 @@ enum CHNL_PROP {
   START_DELAY = 0x005c
 };
 
-enum ErrorCode {
-  SUCCESS = 0,
-  MEM_READ_ERR = 2,
-  ODD_ADDR_ERR = 3,
-  PERIOD_SHORT_ERR = 5,
-  DOUT_START_SHORT_ERR = 7,
-  PAT_DLY_SHORT_ERR = 11,
-  DOUT_START_LG_ERR = 13
-};
-
 class AD9106 {
  public:
   int cs;
@@ -50,7 +40,23 @@ class AD9106 {
       0x0056, 0x0057, 0x0058, 0x0059, 0x005a, 0x005b, 0x005c, 0x005d, 0x005e,
       0x005f, 0x001e, 0x001d};
 
-  /*** 4-Wire SPI, Reset, and Trigger configuration & constructor ***/
+  // AD9106 Error Codes
+  enum ErrorCode {
+    NO_ERROR = 0,
+    MEM_READ_ERR = 1,
+    ODD_ADDR_ERR = 2,
+    PERIOD_SHORT_ERR = 3,
+    DOUT_START_SHORT_ERR = 4,
+    PAT_DLY_SHORT_ERR = 5,
+    DOUT_START_LG_ERR = 6,
+    INVALID_PARAM = 7
+  };
+
+  // Function to read and update error field
+  ErrorCode get_last_error();
+
+  /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
+   * and op-amp configuration & constructor ***/
   AD9106(int CS = 10,
          int RESET = 8,
          int TRIGGER = 7,
@@ -85,7 +91,7 @@ class AD9106 {
   int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
 
   // Functions to set/get DDS frequency
-  int setDDSfreq(float freq);
+  void setDDSfreq(float freq);
   float getDDSfreq();
 
   // Function to setup SPI with communication speed of [hz]
@@ -125,8 +131,11 @@ class AD9106 {
     return base_addr - 4 * (dac - 1);
   }
 
-  // Error Handling Function
-  int get_error();
+  // field assigned to last system error
+  ErrorCode _last_error;
+
+  // Function to check cfg register for chip errors
+  void check_cfg_error();
 };
 
 #endif

@@ -91,8 +91,15 @@ void AD9106::update_pattern() {
   this->start_pattern();
 }
 
+/**
+ * @brief End waveform generation entirely
+ * @param none
+ * @return none
+ */
 void AD9106::end() {
   this->stop_pattern();
+
+  // Deactivate oscillator and op-amps
   digitalWrite(_en_cvddx, LOW);
   digitalWrite(_shdn, LOW);
 }
@@ -135,13 +142,13 @@ int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
  *
  * @param freq the desired DDS frequency
  *
- * @return 0 if the property was set successfully, or an error code if an error
- * occurred.
+ * @return none, sets _last_error if freq invalid
  */
 
-int AD9106::setDDSfreq(float freq) {
-  if (freq > fclk) {
-    return 1;
+void AD9106::setDDSfreq(float freq) {
+  if (freq > fclk || freq < 0) {
+    _last_error = INVALID_PARAM;
+    return;
   }
 
   // calculate required DDSTW
@@ -153,7 +160,6 @@ int AD9106::setDDSfreq(float freq) {
   int16_t lsb = (DDSTW & 0xff) << 8;
   this->spi_write(DDSTW_MSB, msb);
   this->spi_write(DDSTW_LSB, lsb);
-  return 0;
 }
 
 /**
@@ -204,6 +210,7 @@ int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
   digitalWrite(cs, HIGH);
   delay(1);
 
+  this->check_cfg_error();
   return out;
 };
 
@@ -225,6 +232,7 @@ int16_t AD9106::spi_read(uint16_t addr) {
   digitalWrite(cs, HIGH);
   delay(1);
 
+  this->check_cfg_error();
   return out;
 }
 
@@ -232,17 +240,35 @@ int16_t AD9106::spi_read(uint16_t addr) {
 // ERROR HANDLING
 /*********************************************************/
 
-int AD9106::get_error() {
+/**
+ * @brief Check for the highest priority error from the config register and
+ * update _last_error field
+ * @param none
+ * @return none
+ */
+void AD9106::check_cfg_error() {
   // Error flags in least significant 6 bits
   int16_t err_val = spi_read(CFG_ERROR) & 0x3f;
   if (err_val == 0) {
-    return SUCCESS;
+    _last_error = NO_ERROR;
   } else {
-    int errors = 1;
     for (int i = 0; i < 6; i++) {
       if (err_val & (1 << i)) {
-        errors *= pow(2, i);
+        _last_error = static_cast<ErrorCode>(i + 1);
+        break;
       }
     }
   }
+}
+
+/**
+ * @brief Get the current system error and update _last_error field
+ * @param none
+ * @return none
+ */
+AD9106::ErrorCode AD9106::get_last_error() {
+  ErrorCode error = _last_error;
+  // update error
+  this->check_cfg_error();
+  return error;
 }
