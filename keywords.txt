@@ -13,17 +13,27 @@ AD9106	KEYWORD1
 #######################################
 
 begin	KEYWORD2
+reg_reset	KEYWORD2
 start_pattern	KEYWORD2
 stop_pattern	KEYWORD2
-reg_reset	KEYWORD2
+update_pattern	KEYWORD2
+end	KEYWORD2
 spi_init	KEYWORD2
 spi_write	KEYWORD2
 spi_read	KEYWORD2
-update_pattern	KEYWORD2
 set_CHNL_prop	KEYWORD2
 set_CHNL_DGAIN	KEYWORD2
 set_CHNL_DDS_PHASE	KEYWORD2
 set_CHNL_START_DELAY	KEYWORD2
+setDDSfreq	KEYWORD2
+getDDSfreq	KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+CHNL	KEYWORD3
+CHNL_PROP	KEYWORD3
 
 #######################################
 # Constants (LITERAL1)

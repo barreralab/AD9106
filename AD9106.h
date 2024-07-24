@@ -37,6 +37,7 @@ class AD9106 {
  public:
   int cs;
   int reset;
+  float fclk;
 
   /*** SPI register addresses ***/
   uint16_t reg_add[66] = {
@@ -57,7 +58,7 @@ class AD9106 {
          int SHDN = 4);
 
   // Function to initialize GPIO pins on Arduino
-  void begin(bool OP_AMPS = false);
+  void begin(bool OP_AMPS = false, float FCLK = NULL);
 
   // Function to reset register values
   void reg_reset();
@@ -82,6 +83,10 @@ class AD9106 {
   int set_CHNL_DGAIN(CHNL chnl, int16_t gain);
   int set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase);
   int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
+
+  // Functions to set/get DDS frequency
+  int setDDSfreq(float freq);
+  float getDDSfreq();
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
