@@ -19,6 +19,7 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
       _en_cvddx(EN_CVDDX),
       _shdn(SHDN) {
   _last_error = NO_ERROR;
+  // Serial.println("initialized");
 }
 
 /**
@@ -256,7 +257,7 @@ void AD9106::check_cfg_error() {
   } else {
     for (int i = 0; i < 6; i++) {
       if (err_val & (1 << i)) {
-        _last_error = static_cast<ErrorCode>(i + 1);
+        _last_error = static_cast<AD9106::ErrorCode>(i + 1);
         break;
       }
     }
@@ -268,8 +269,8 @@ void AD9106::check_cfg_error() {
  * @param none
  * @return none
  */
-AD9106::ErrorCode AD9106::get_last_error() {
-  ErrorCode error = _last_error;
+AD9106::AD9106::ErrorCode AD9106::get_last_error() {
+  AD9106::ErrorCode error = _last_error;
   // update error
   this->check_cfg_error();
   return error;

@@ -43,13 +43,13 @@ class AD9106 {
   // AD9106 Error Codes
   enum ErrorCode {
     NO_ERROR = 0,
-    MEM_READ_ERR = 1,
-    ODD_ADDR_ERR = 2,
-    PERIOD_SHORT_ERR = 3,
-    DOUT_START_SHORT_ERR = 4,
-    PAT_DLY_SHORT_ERR = 5,
-    DOUT_START_LG_ERR = 6,
-    INVALID_PARAM = 7
+    MEM_READ_ERR,
+    ODD_ADDR_ERR,
+    PERIOD_SHORT_ERR,
+    DOUT_START_SHORT_ERR,
+    PAT_DLY_SHORT_ERR,
+    DOUT_START_LG_ERR,
+    INVALID_PARAM
   };
 
   /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
@@ -92,7 +92,7 @@ class AD9106 {
   float getDDSfreq();
 
   // Function to read and update error field
-  ErrorCode get_last_error();
+  AD9106::ErrorCode get_last_error();
 
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
@@ -116,6 +116,8 @@ class AD9106 {
   int _en_cvddx;
   int _trigger;
   int _shdn;
+  // field assigned to last system error
+  AD9106::ErrorCode _last_error;
 
   /*
    * @brief Get address for specific DAC based on given base address
@@ -130,9 +132,6 @@ class AD9106 {
     }
     return base_addr - 4 * (dac - 1);
   }
-
-  // field assigned to last system error
-  ErrorCode _last_error;
 
   // Function to check cfg register for chip errors
   void check_cfg_error();
