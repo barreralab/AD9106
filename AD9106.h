@@ -51,6 +51,8 @@ class AD9106 {
     DOUT_START_LG_ERR,
     INVALID_PARAM
   };
+  // field assigned to last system error
+  ErrorCode _last_error;
 
   /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
    * and op-amp configuration & constructor ***/
@@ -116,8 +118,6 @@ class AD9106 {
   int _en_cvddx;
   int _trigger;
   int _shdn;
-  // field assigned to last system error
-  AD9106::ErrorCode _last_error;
 
   /*
    * @brief Get address for specific DAC based on given base address

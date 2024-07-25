@@ -69,6 +69,7 @@ void AD9106::reg_reset() {
  */
 void AD9106::start_pattern() {
   digitalWrite(_trigger, LOW);
+  this->check_cfg_error();
 }
 
 /**
@@ -235,7 +236,6 @@ int16_t AD9106::spi_read(uint16_t addr) {
   digitalWrite(cs, HIGH);
   delay(1);
 
-  this->check_cfg_error();
   return out;
 }
 
@@ -270,8 +270,7 @@ void AD9106::check_cfg_error() {
  * @return none
  */
 AD9106::AD9106::ErrorCode AD9106::get_last_error() {
-  AD9106::ErrorCode error = _last_error;
-  // update error
-  this->check_cfg_error();
-  return error;
+  // clear past cfg register error flags and update _last_error
+  spi_write(CFG_ERROR, 0x8000);
+  return _last_error;
 }
