@@ -93,12 +93,15 @@ class AD9106 {
   // Publicly accessible register addresses for common operations
   static const uint16_t RAMUPDATE;
   static const uint16_t PAT_STATUS;
+  static const uint16_t PAT_TYPE;
   static const uint16_t WAV4_3CONFIG;
   static const uint16_t WAV2_1CONFIG;
+  static const uint16_t PAT_PERIOD;
   static const uint16_t DDSTW_MSB;
   static const uint16_t DDSTW_LSB;
   static const uint16_t SAW4_3CONFIG;
   static const uint16_t SAW2_1CONFIG;
+  static const uint16_t TRIG_TW_SEL;
 
  private:
   int _en_cvddx;

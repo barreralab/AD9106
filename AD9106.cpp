@@ -1,3 +1,4 @@
+
 #include "Arduino.h"
 
 #include <SPI.h>
@@ -6,12 +7,15 @@
 // Definitions of static const uint16_t members
 const uint16_t AD9106::RAMUPDATE = 0x001d;
 const uint16_t AD9106::PAT_STATUS = 0x001e;
+const uint16_t AD9106::PAT_TYPE = 0x001f;
 const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
 const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
+const uint16_t AD9106::PAT_PERIOD = 0X0029;
 const uint16_t AD9106::DDSTW_MSB = 0x003E;
 const uint16_t AD9106::DDSTW_LSB = 0x003F;
 const uint16_t AD9106::SAW4_3CONFIG = 0x0036;
 const uint16_t AD9106::SAW2_1CONFIG = 0x0037;
+const uint16_t AD9106::TRIG_TW_SEL = 0x0044;
 
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
     : cs(CS),
@@ -66,6 +70,11 @@ void AD9106::reg_reset() {
  * @return none
  */
 void AD9106::start_pattern() {
+  // Toggle run bit to allow trigger control
+ if (!(spi_read(PAT_STATUS) & 0x0001)) {
+    spi_write(PAT_STATUS, 0x0001);
+    delay(10);
+  }
   digitalWrite(_trigger, LOW);
 }
 
@@ -179,24 +188,23 @@ float AD9106::getDDSfreq() {
  * period on specified channel
  *
  * @param chnl to configure
- * @return DDS frequency
+ * @return none
  */
 void AD9106::setDDSsine(CHNL chnl) {
-  uint16_t wav_config_addr;
-  if (chnl <= 2)
-    wav_config_addr = WAV2_1CONFIG;
-  else
-    wav_config_addr = WAV4_3CONFIG;
+  uint16_t wav_config_addr = WAV2_1CONFIG - (chnl <= 2);
 
-  // set wav_config register to DDS output using start_delay and pat_period
-  int16_t mask = 0xff << (8 * ((chnl - 1) % 2));
-  int16_t curr_config = spi_read(wav_config_addr) & !mask;
+  // set wav_config register to DDS output using start_delay and pat_period for chnl
+  int offset = (chnl - 1) % 2;
+  int16_t mask = 0xff << (8 * offset);
+  int16_t curr_config = spi_read(wav_config_addr) & ~mask;
   int16_t new_config = curr_config | (0x3232 & mask);
   spi_write(wav_config_addr, new_config);
 
-  // Disable saw_tooth
-  spi_write(SAW4_3CONFIG, 0x0000);
-  spi_write(SAW2_1CONFIG, 0x0000);
+  // Apply start delay to first pattern only
+  spi_write(TRIG_TW_SEL, 0x0002);
+
+  // Set Pattern type to continuous
+  spi_write(PAT_TYPE, 0x0000);
 }
 
 /*********************************************************/
@@ -253,3 +261,11 @@ int16_t AD9106::spi_read(uint16_t addr) {
 
   return out;
 }
+
+
+// {0, E00, 0, 0, 0, 0, 0, 0, 0, 1F0A, 1F0A, 1F0A, 1F0A, 0, 4000, 0, E, 0, 0, 0, 0, 3232, 3232, 111, 8000, 101, 101,
+// 3, 0, 0, 0, 0, 0, 0, 0, 0,
+// 0, 0, 0, D1, B700, 0, 0, 0, 0,
+// 0, 0, 0, 0, 0, 0, 1, 0, 0,
+//  0, 1, 0, 0, 0, 1, 0, 0, 0,
+//  1, 1, 0}
