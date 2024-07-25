@@ -189,7 +189,7 @@ void AD9106::setDDSsine(CHNL chnl) {
     wav_config_addr = WAV4_3CONFIG;
 
   // set wav_config register to DDS output using start_delay and pat_period
-  int16_t mask = 0xff << (8 * (chnl % 2 - 1));
+  int16_t mask = 0xff << (8 * ((chnl - 1) % 2));
   int16_t curr_config = spi_read(wav_config_addr) & mask;
   int16_t new_config = curr_config | (0x3232 & mask);
   spi_write(wav_config_addr, new_config);
