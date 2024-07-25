@@ -71,7 +71,7 @@ void AD9106::reg_reset() {
  */
 void AD9106::start_pattern() {
   // Toggle run bit to allow trigger control
- if (!(spi_read(PAT_STATUS) & 0x0001)) {
+  if (!(spi_read(PAT_STATUS) & 0x0001)) {
     spi_write(PAT_STATUS, 0x0001);
     delay(10);
   }
@@ -193,7 +193,8 @@ float AD9106::getDDSfreq() {
 void AD9106::setDDSsine(CHNL chnl) {
   uint16_t wav_config_addr = WAV2_1CONFIG - (chnl <= 2);
 
-  // set wav_config register to DDS output using start_delay and pat_period for chnl
+  // set wav_config register to DDS output using start_delay and pat_period for
+  // chnl
   int offset = (chnl - 1) % 2;
   int16_t mask = 0xff << (8 * offset);
   int16_t curr_config = spi_read(wav_config_addr) & ~mask;
@@ -261,11 +262,3 @@ int16_t AD9106::spi_read(uint16_t addr) {
 
   return out;
 }
-
-
-// {0, E00, 0, 0, 0, 0, 0, 0, 0, 1F0A, 1F0A, 1F0A, 1F0A, 0, 4000, 0, E, 0, 0, 0, 0, 3232, 3232, 111, 8000, 101, 101,
-// 3, 0, 0, 0, 0, 0, 0, 0, 0,
-// 0, 0, 0, D1, B700, 0, 0, 0, 0,
-// 0, 0, 0, 0, 0, 0, 1, 0, 0,
-//  0, 1, 0, 0, 0, 1, 0, 0, 0,
-//  1, 1, 0}
