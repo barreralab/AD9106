@@ -78,6 +78,9 @@ class AD9106 {
   int setDDSfreq(float freq);
   float getDDSfreq();
 
+  // Function to configure registers for DDS sinewave output
+  void setDDSsine(CHNL chnl);
+
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
 
@@ -94,6 +97,8 @@ class AD9106 {
   static const uint16_t WAV2_1CONFIG;
   static const uint16_t DDSTW_MSB;
   static const uint16_t DDSTW_LSB;
+  static const uint16_t SAW4_3CONFIG;
+  static const uint16_t SAW2_1CONFIG;
 
  private:
   int _en_cvddx;

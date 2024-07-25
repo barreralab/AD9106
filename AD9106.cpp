@@ -10,6 +10,8 @@ const uint16_t AD9106::WAV4_3CONFIG = 0x0026;
 const uint16_t AD9106::WAV2_1CONFIG = 0x0027;
 const uint16_t AD9106::DDSTW_MSB = 0x003E;
 const uint16_t AD9106::DDSTW_LSB = 0x003F;
+const uint16_t AD9106::SAW4_3CONFIG = 0x0036;
+const uint16_t AD9106::SAW2_1CONFIG = 0x0037;
 
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
     : cs(CS),
@@ -170,6 +172,30 @@ float AD9106::getDDSfreq() {
   // calculate frequency
   float freq = DDSTW * fclk / pow(2, 24);
   return freq;
+}
+
+/**
+ * Configure registers for prestored DDS output with start delay and patter
+ * period on specified channel
+ *
+ * @param chnl to configure
+ * @return DDS frequency
+ */
+void AD9106::setDDSsine(CHNL chnl) {
+  uint16_t wav_config_addr;
+  if (chnl <= 2)
+    wav_config_addr = WAV2_1CONFIG;
+  else
+    wav_config_addr = WAV4_3CONFIG;
+
+  // set wav_config register to DDS output using start_delay and pat_period
+  int16_t curr_config = spi_read(wav_config_addr);
+  int16_t new_config = curr_config | (0x32 << (8 * (chnl % 2) - 1));
+  spi_write(wav_config_addr, new_config);
+
+  // Disable saw_tooth
+  spi_write(SAW4_3CONFIG, 0x0000);
+  spi_write(SAW2_1CONFIG, 0x0000);
 }
 
 /*********************************************************/
