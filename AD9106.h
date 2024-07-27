@@ -96,9 +96,6 @@ class AD9106 {
   // Function to configure registers for DDS sinewave output
   void setDDSsine(CHNL chnl);
 
-  // Function to read and update error field
-  AD9106::ErrorCode get_last_error();
-
   // Function to setup SPI with communication speed of [hz]
   void spi_init(uint32_t hz);
 
@@ -143,6 +140,9 @@ class AD9106 {
 
   // Function to check cfg register for chip errors
   void check_cfg_error();
+
+  // Function to update error field
+  void update_last_error();
 };
 
 #endif
