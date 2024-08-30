@@ -64,7 +64,7 @@ void AD9106::begin(bool OP_AMPS, float FCLK) {
 
 void AD9106::reg_reset() {
   digitalWrite(reset, LOW);
-  delay(10);
+  delay(1);
   digitalWrite(reset, HIGH);
 }
 
@@ -77,7 +77,7 @@ void AD9106::start_pattern() {
   // Toggle run bit to allow trigger control
   if (!(spi_read(PAT_STATUS) & 0x0001)) {
     spi_write(PAT_STATUS, 0x0001);
-    delay(10);
+    delay(1);
   }
   digitalWrite(_trigger, LOW);
   this->update_last_error();
@@ -100,9 +100,9 @@ void AD9106::stop_pattern() {
  */
 void AD9106::update_pattern() {
   this->stop_pattern();
-  delay(10);
+  delay(1);
   this->spi_write(RAMUPDATE, 0x0001);
-  delay(10);
+  delay(1);
   this->start_pattern();
 }
 
@@ -150,6 +150,18 @@ int AD9106::set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase) {
 
 int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
   return this->set_CHNL_prop(START_DELAY, chnl, delay);
+}
+
+/**
+ * Gets the current value of a DAC channel property.
+ *
+ * @param property The property of the DAC channel to read.
+ * @param dac The DAC channel to set the property for.
+ *
+ * @return reg_data data stored in corresponding register
+ */
+int16_t AD9106::get_CHNL_prop(CHNL_PROP property, CHNL dac) {
+  return this->spi_read(get_dac_addr(property, dac));
 }
 
 /**
@@ -250,7 +262,6 @@ int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
   digitalWrite(cs, HIGH);
   delay(1);
 
-  // this->check_cfg_error();
   return out;
 };
 

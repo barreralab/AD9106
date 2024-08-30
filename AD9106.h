@@ -80,7 +80,7 @@ class AD9106 {
   // Function to end AD9106 operation
   void end();
 
-  // Function to set register properties
+  // Function to set channel properties
   int set_CHNL_prop(CHNL_PROP property, CHNL chnl, int16_t value);
 
   // Wrapper Functions for set_CHNL_prop
@@ -88,6 +88,9 @@ class AD9106 {
   int set_CHNL_DGAIN(CHNL chnl, int16_t gain);
   int set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase);
   int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
+
+  // Function to get channel properties
+  int16_t get_CHNL_prop(CHNL_PROP property, CHNL chnl);
 
   // Functions to set/get DDS frequency
   void setDDSfreq(float freq);
