@@ -127,6 +127,8 @@ class AD9106 {
   int _trigger;
   int _shdn;
 
+  uint32_t spi_speed;
+
   /*
    * @brief Get address for specific DAC based on given base address
    * @param base_addr - constant base address
