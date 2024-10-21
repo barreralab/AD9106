@@ -16,13 +16,17 @@ const uint16_t AD9106::DDSTW_LSB = 0x003F;
 const uint16_t AD9106::SAW4_3CONFIG = 0x0036;
 const uint16_t AD9106::SAW2_1CONFIG = 0x0037;
 const uint16_t AD9106::TRIG_TW_SEL = 0x0044;
+const uint16_t AD9106::CFG_ERROR = 0x0060;
 
 AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
     : cs(CS),
       reset(RESET),
       _trigger(TRIGGER),
       _en_cvddx(EN_CVDDX),
-      _shdn(SHDN) {}
+      _shdn(SHDN) {
+  _last_error = NO_ERROR;
+  // Serial.println("initialized");
+}
 
 /**
  * @brief Initialize GPIO and SPI pins on Arduino
@@ -60,7 +64,7 @@ void AD9106::begin(bool OP_AMPS, float FCLK) {
 
 void AD9106::reg_reset() {
   digitalWrite(reset, LOW);
-  delay(10);
+  delay(1);
   digitalWrite(reset, HIGH);
 }
 
@@ -73,9 +77,10 @@ void AD9106::start_pattern() {
   // Toggle run bit to allow trigger control
   if (!(spi_read(PAT_STATUS) & 0x0001)) {
     spi_write(PAT_STATUS, 0x0001);
-    delay(10);
+    delay(1);
   }
   digitalWrite(_trigger, LOW);
+  this->update_last_error();
 }
 
 /**
@@ -95,14 +100,21 @@ void AD9106::stop_pattern() {
  */
 void AD9106::update_pattern() {
   this->stop_pattern();
-  delay(10);
+  delay(1);
   this->spi_write(RAMUPDATE, 0x0001);
-  delay(10);
+  delay(1);
   this->start_pattern();
 }
 
+/**
+ * @brief End waveform generation entirely
+ * @param none
+ * @return none
+ */
 void AD9106::end() {
   this->stop_pattern();
+
+  // Deactivate oscillator and op-amps
   digitalWrite(_en_cvddx, LOW);
   digitalWrite(_shdn, LOW);
 }
@@ -141,17 +153,29 @@ int AD9106::set_CHNL_START_DELAY(CHNL chnl, int16_t delay) {
 }
 
 /**
+ * Gets the current value of a DAC channel property.
+ *
+ * @param property The property of the DAC channel to read.
+ * @param dac The DAC channel to set the property for.
+ *
+ * @return reg_data data stored in corresponding register
+ */
+int16_t AD9106::get_CHNL_prop(CHNL_PROP property, CHNL dac) {
+  return this->spi_read(get_dac_addr(property, dac));
+}
+
+/**
  * Sets the DDS frequency to specified value
  *
  * @param freq the desired DDS frequency
  *
- * @return 0 if the property was set successfully, or an error code if an error
- * occurred.
+ * @return none, sets _last_error if freq invalid
  */
 
-int AD9106::setDDSfreq(float freq) {
-  if (freq > fclk) {
-    return 1;
+void AD9106::setDDSfreq(float freq) {
+  if (freq > fclk || freq < 0) {
+    _last_error = INVALID_PARAM;
+    return;
   }
 
   // calculate required DDSTW
@@ -163,7 +187,6 @@ int AD9106::setDDSfreq(float freq) {
   int16_t lsb = (DDSTW & 0xff) << 8;
   this->spi_write(DDSTW_MSB, msb);
   this->spi_write(DDSTW_LSB, lsb);
-  return 0;
 }
 
 /**
@@ -218,8 +241,8 @@ void AD9106::setDDSsine(CHNL chnl) {
  * @return none
  */
 void AD9106::spi_init(uint32_t hz) {
+  spi_speed = hz;
   SPI.begin();
-  SPI.beginTransaction(SPISettings(hz, MSBFIRST, SPI_MODE0));
 }
 
 /**
@@ -231,12 +254,14 @@ void AD9106::spi_init(uint32_t hz) {
 int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
   int16_t out;
 
+  SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
   digitalWrite(cs, LOW);
 
   SPI.transfer16(addr);
   out = SPI.transfer16(data);
 
   digitalWrite(cs, HIGH);
+  SPI.endTransaction();
   delay(1);
 
   return out;
@@ -261,4 +286,40 @@ int16_t AD9106::spi_read(uint16_t addr) {
   delay(1);
 
   return out;
+}
+
+/*********************************************************/
+// ERROR HANDLING
+/*********************************************************/
+
+/**
+ * @brief Check for the highest priority error from the config register and
+ * update _last_error field
+ * @param none
+ * @return none
+ */
+void AD9106::check_cfg_error() {
+  // Error flags in least significant 6 bits
+  int16_t err_val = spi_read(CFG_ERROR) & 0x3f;
+  if (err_val == 0) {
+    _last_error = NO_ERROR;
+  } else {
+    for (int i = 0; i < 6; i++) {
+      if (err_val & (1 << i)) {
+        _last_error = static_cast<AD9106::ErrorCode>(i + 1);
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * @brief Get the current system error and update _last_error field
+ * @param none
+ * @return none
+ */
+void AD9106::update_last_error() {
+  // clear past cfg register error flags and update _last_error
+  spi_write(CFG_ERROR, 0x8000);
+  this->check_cfg_error();
 }

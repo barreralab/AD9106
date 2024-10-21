@@ -40,7 +40,22 @@ class AD9106 {
       0x0056, 0x0057, 0x0058, 0x0059, 0x005a, 0x005b, 0x005c, 0x005d, 0x005e,
       0x005f, 0x001e, 0x001d};
 
-  /*** 4-Wire SPI, Reset, and Trigger configuration & constructor ***/
+  // AD9106 Error Codes
+  enum ErrorCode {
+    NO_ERROR = 0,
+    MEM_READ_ERR,
+    ODD_ADDR_ERR,
+    PERIOD_SHORT_ERR,
+    DOUT_START_SHORT_ERR,
+    PAT_DLY_SHORT_ERR,
+    DOUT_START_LG_ERR,
+    INVALID_PARAM
+  };
+  // field assigned to last system error
+  ErrorCode _last_error;
+
+  /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
+   * and op-amp configuration & constructor ***/
   AD9106(int CS = 10,
          int RESET = 8,
          int TRIGGER = 7,
@@ -65,7 +80,7 @@ class AD9106 {
   // Function to end AD9106 operation
   void end();
 
-  // Function to set register properties
+  // Function to set channel properties
   int set_CHNL_prop(CHNL_PROP property, CHNL chnl, int16_t value);
 
   // Wrapper Functions for set_CHNL_prop
@@ -74,8 +89,11 @@ class AD9106 {
   int set_CHNL_DDS_PHASE(CHNL chnl, int16_t phase);
   int set_CHNL_START_DELAY(CHNL chnl, int16_t start_delay);
 
+  // Function to get channel properties
+  int16_t get_CHNL_prop(CHNL_PROP property, CHNL chnl);
+
   // Functions to set/get DDS frequency
-  int setDDSfreq(float freq);
+  void setDDSfreq(float freq);
   float getDDSfreq();
 
   // Function to configure registers for DDS sinewave output
@@ -102,11 +120,14 @@ class AD9106 {
   static const uint16_t SAW4_3CONFIG;
   static const uint16_t SAW2_1CONFIG;
   static const uint16_t TRIG_TW_SEL;
+  static const uint16_t CFG_ERROR;
 
  private:
   int _en_cvddx;
   int _trigger;
   int _shdn;
+
+  uint32_t spi_speed;
 
   /*
    * @brief Get address for specific DAC based on given base address
@@ -121,6 +142,12 @@ class AD9106 {
     }
     return base_addr - 4 * (dac - 1);
   }
+
+  // Function to check cfg register for chip errors
+  void check_cfg_error();
+
+  // Function to update error field
+  void update_last_error();
 };
 
 #endif
