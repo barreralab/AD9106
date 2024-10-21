@@ -241,8 +241,8 @@ void AD9106::setDDSsine(CHNL chnl) {
  * @return none
  */
 void AD9106::spi_init(uint32_t hz) {
+  spi_speed = hz;
   SPI.begin();
-  SPI.beginTransaction(SPISettings(hz, MSBFIRST, SPI_MODE0));
 }
 
 /**
@@ -254,12 +254,14 @@ void AD9106::spi_init(uint32_t hz) {
 int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
   int16_t out;
 
+  SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
   digitalWrite(cs, LOW);
 
   SPI.transfer16(addr);
   out = SPI.transfer16(data);
 
   digitalWrite(cs, HIGH);
+  SPI.endTransaction();
   delay(1);
 
   return out;
