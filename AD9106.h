@@ -125,8 +125,7 @@ class AD9106 {
   int _trigger;   // AD9106 trigger pin
   int _shdn;      // On-board op-amp power enable
 
-  uint32_t spi_speed;        // SPI bus speed
-  bool pat_running = false;  // Flag to indicate if PAT_STATUS bit enabled
+  uint32_t spi_speed;  // SPI bus speed
 
   /*
    * @brief Get address for specific DAC based on given base address
