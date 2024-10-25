@@ -1,3 +1,11 @@
+/*******************************************************************************
+    @file:   dds_sinewaves.ino
+
+    @brief:  AD9106 DDS sine wave generator example
+
+    @note:   Use no-line ending in Arduino IDE. Tested on Arduino UNO R3.
+*******************************************************************************/
+
 #include <AD9106.h>
 
 // Initialize AD9106 with CS 10 and default reset, trigger, en_cvddx
