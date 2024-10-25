@@ -78,14 +78,7 @@ void AD9106::reg_reset() {
  * @return none
  */
 void AD9106::start_pattern() {
-  // Toggle run bit to allow trigger control
-  if (!pat_running) {
-    spi_write(PAT_STATUS, 0x0001);
-    delay(1);
-    pat_running = true;
-  }
   digitalWrite(_trigger, LOW);
-  this->update_last_error();
 }
 
 /**
@@ -95,7 +88,6 @@ void AD9106::start_pattern() {
  */
 void AD9106::stop_pattern() {
   digitalWrite(_trigger, HIGH);
-  pat_running = false;
 }
 
 /**
@@ -107,9 +99,12 @@ void AD9106::stop_pattern() {
 void AD9106::update_pattern() {
   this->stop_pattern();
   delay(1);
-  this->spi_write(RAMUPDATE, 0x0001);
+  this->spi_write(PAT_STATUS, 0x0001);  // Toggle Run Bit
+  this->spi_write(RAMUPDATE, 0x0001);   // Trigger RAM Update
   delay(1);
   this->start_pattern();
+
+  this->update_last_error();
 }
 
 /**
@@ -220,12 +215,11 @@ float AD9106::getDDSfreq() {
  * @return none
  */
 void AD9106::setDDSsine(CHNL chnl) {
-  uint16_t wav_config_addr = WAV2_1CONFIG - (chnl <= 2);
+  uint16_t wav_config_addr = WAV2_1CONFIG - (chnl > 2);
 
-  // set wav_config register to DDS output using start_delay and pat_period for
-  // chnl
+  // set wav_config register to DDS output using start_delay and pat_period
   int offset = (chnl - 1) % 2;
-  int16_t mask = 0xff << (8 * offset);
+  int16_t mask = 0x00ff << (8 * offset);
   int16_t curr_config = spi_read(wav_config_addr) & ~mask;
   int16_t new_config = curr_config | (0x3232 & mask);
   spi_write(wav_config_addr, new_config);
@@ -279,16 +273,17 @@ int16_t AD9106::spi_write(uint16_t addr, int16_t data) {
  * @return reg_data - data returned by AD9106
  */
 int16_t AD9106::spi_read(uint16_t addr) {
-  digitalWrite(cs, LOW);
-
-  uint16_t read_add;
   int16_t out;
+  uint16_t read_add;
 
+  SPI.beginTransaction(SPISettings(spi_speed, MSBFIRST, SPI_MODE0));
+  digitalWrite(cs, LOW);
   read_add = addr | 0x8000;
   SPI.transfer16(read_add);
   out = SPI.transfer16(0);
 
   digitalWrite(cs, HIGH);
+  SPI.endTransaction();
   delay(1);
 
   return out;
