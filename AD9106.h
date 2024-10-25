@@ -25,11 +25,11 @@ enum CHNL_PROP {
 
 class AD9106 {
  public:
-  int cs;
-  int reset;
-  float fclk;
+  int cs;      // chip select pin
+  int reset;   // AD9106 reset pin
+  float fclk;  // DAC clock frequency
 
-  /*** SPI register addresses ***/
+  /*** AD9106 register addresses ***/
   uint16_t reg_add[66] = {
       0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008,
       0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e, 0x001f, 0x0020, 0x0022,
@@ -51,10 +51,10 @@ class AD9106 {
     DOUT_START_LG_ERR,
     INVALID_PARAM
   };
-  // field assigned to last system error
+  // field assigned to most recent system error
   ErrorCode _last_error;
 
-  /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillar,
+  /*** 4-Wire SPI over hardware SPI ports, Reset, Trigger, on_board oscillator,
    * and op-amp configuration & constructor ***/
   AD9106(int CS = 10,
          int RESET = 8,
@@ -63,7 +63,7 @@ class AD9106 {
          int SHDN = 4);
 
   // Function to initialize GPIO pins on Arduino
-  void begin(bool OP_AMPS = false, float FCLK = NULL);
+  void begin(bool OP_AMPS = false, float FCLK = 0);
 
   // Function to reset register values
   void reg_reset();
@@ -123,11 +123,12 @@ class AD9106 {
   static const uint16_t CFG_ERROR;
 
  private:
-  int _en_cvddx;
-  int _trigger;
-  int _shdn;
+  int _en_cvddx;  // On-board oscillators power enable
+  int _trigger;   // AD9106 trigger pin
+  int _shdn;      // On-board op-amp power enable
 
-  uint32_t spi_speed;
+  uint32_t spi_speed;        // SPI bus speed
+  bool pat_running = false;  // Flag to indicate if PAT_STATUS bit enabled
 
   /*
    * @brief Get address for specific DAC based on given base address
