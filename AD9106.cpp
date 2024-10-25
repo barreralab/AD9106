@@ -25,7 +25,6 @@ AD9106::AD9106(int CS, int RESET, int TRIGGER, int EN_CVDDX, int SHDN)
       _en_cvddx(EN_CVDDX),
       _shdn(SHDN) {
   _last_error = NO_ERROR;
-  // Serial.println("initialized");
 }
 
 /**
@@ -46,8 +45,8 @@ void AD9106::begin(bool OP_AMPS, float FCLK) {
   digitalWrite(_trigger, HIGH);
   digitalWrite(reset, HIGH);
 
-  if (FCLK == NULL) {
-    // Enable on-board oscillators and set fclk to default
+  if (FCLK == 0) {
+    // Enable on-board oscillators and set fclk to crystal oscillator frequency
     digitalWrite(_en_cvddx, HIGH);
     fclk = 156250000;
   } else {
@@ -62,6 +61,11 @@ void AD9106::begin(bool OP_AMPS, float FCLK) {
   }
 }
 
+/**
+ * @brief Reset AD9106 registers
+ * @param none
+ * @return none
+ */
 void AD9106::reg_reset() {
   digitalWrite(reset, LOW);
   delay(1);
@@ -75,9 +79,10 @@ void AD9106::reg_reset() {
  */
 void AD9106::start_pattern() {
   // Toggle run bit to allow trigger control
-  if (!(spi_read(PAT_STATUS) & 0x0001)) {
+  if (!pat_running) {
     spi_write(PAT_STATUS, 0x0001);
     delay(1);
+    pat_running = true;
   }
   digitalWrite(_trigger, LOW);
   this->update_last_error();
@@ -90,6 +95,7 @@ void AD9106::start_pattern() {
  */
 void AD9106::stop_pattern() {
   digitalWrite(_trigger, HIGH);
+  pat_running = false;
 }
 
 /**
@@ -182,7 +188,7 @@ void AD9106::setDDSfreq(float freq) {
   const float factor = pow(2, 24) / fclk;
   uint32_t DDSTW = ((uint32_t)round(factor * freq));
 
-  // partition 6 significant bytes of DDSTW for TW MSB/LSB regs
+  // partition TW bytes into MSB/LSB regs
   int16_t msb = DDSTW >> 8;
   int16_t lsb = (DDSTW & 0xff) << 8;
   this->spi_write(DDSTW_MSB, msb);
