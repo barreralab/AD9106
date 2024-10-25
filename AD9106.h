@@ -8,8 +8,6 @@
 #ifndef __ad9106_h__
 #define __ad9106_h__
 
-// specify if on-board op-amps are used
-
 #include "Arduino.h"
 
 // enum for DAC Channels to constrain function parameters
