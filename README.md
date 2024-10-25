@@ -1,7 +1,10 @@
 # AD9106
 Arduino Library to interface with Analog Devices' EVAL-AD9106 DAC for arbitrary wave-form generation. Guided by code examples from [documentation page](https://www.analog.com/en/resources/evaluation-hardware-and-software/evaluation-boards-kits/EVAL-AD9106.html#eb-documentation)
 
-Currently supports DDS sourced and pre-set waveforms. SRAM not modifiable. 
+Currently supports DDS sourced and pre-set waveforms. SRAM not modifiable.
+
+# How to Use 
+Clone repository into local Arduino libraries folder. Access example programs through Arduino IDE: File > Examples > AD9106. 
 
 # Waveform Examples 
 **AD9106 Example 3: Four Pulsed DDS-Generated Sine Waves
@@ -16,3 +19,6 @@ Sawtooth waveforms**
 **AD9106 Example 6: DDS-Generated Sine wave and 3
 Sawtooth waveforms**
 ![IMG_6311](https://github.com/user-attachments/assets/ea3cff74-81ed-4577-90d5-b799315ee55c)
+
+**Custom 4 DDS-Generated Sinewaves, non-pulsed continuous**
+![IMG_6312](https://github.com/user-attachments/assets/c49d8b07-bfbc-4fad-b47e-45705cdc63ce)
