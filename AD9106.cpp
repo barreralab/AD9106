@@ -99,12 +99,12 @@ void AD9106::stop_pattern() {
 void AD9106::update_pattern() {
   this->stop_pattern();
   delay(1);
-  this->spi_write(PAT_STATUS, 0x0001);  // Toggle Run Bit
   this->spi_write(RAMUPDATE, 0x0001);   // Trigger RAM Update
+  this->spi_write(PAT_STATUS, 0x0001);  // Toggle Run Bit
   delay(1);
   this->start_pattern();
 
-  this->update_last_error();
+  // this->update_last_error();
 }
 
 /**
@@ -219,7 +219,7 @@ void AD9106::setDDSsine(CHNL chnl) {
 
   // set wav_config register to DDS output using start_delay and pat_period
   int offset = (chnl - 1) % 2;
-  int16_t mask = 0x00ff << (8 * offset);
+  uint16_t mask = 0x00ff << (8 * offset);
   int16_t curr_config = spi_read(wav_config_addr) & ~mask;
   int16_t new_config = curr_config | (0x3232 & mask);
   spi_write(wav_config_addr, new_config);
