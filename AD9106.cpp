@@ -199,11 +199,13 @@ void AD9106::setDDSfreq(float freq) {
 float AD9106::getDDSfreq() {
   // get DDSTW from TW registers
   uint16_t msb = this->spi_read(DDSTW_MSB);
-  uint16_t lsb = this->spi_read(DDSTW_LSB);
-  uint32_t DDSTW = (msb << 8) | (lsb >> 8);
+  // Explicitly widen msb before shifting
+  uint32_t msb32 = ((uint32_t)msb) << 8;
+  uint16_t lsb = (uint16_t)this->spi_read(DDSTW_LSB);
+  uint32_t DDSTW = msb32 + (lsb >> 8);
 
   // calculate frequency
-  float freq = DDSTW * fclk / pow(2, 24);
+  float freq = (float)DDSTW * fclk / pow(2, 24);
   return freq;
 }
 
